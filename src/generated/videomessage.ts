@@ -24,7 +24,11 @@ export interface VideoMessage {
      */
     iframe: boolean;
     /**
-     * @generated from protobuf field: bytes nalUnit = 3;
+     * @generated from protobuf field: bool isParameterSet = 3;
+     */
+    isParameterSet: boolean;
+    /**
+     * @generated from protobuf field: bytes nalUnit = 4;
      */
     nalUnit: Uint8Array;
 }
@@ -34,11 +38,12 @@ class VideoMessage$Type extends MessageType<VideoMessage> {
         super("VideoMessage", [
             { no: 1, name: "cameraNumber", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 2, name: "iframe", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 3, name: "nalUnit", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+            { no: 3, name: "isParameterSet", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 4, name: "nalUnit", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
         ]);
     }
     create(value?: PartialMessage<VideoMessage>): VideoMessage {
-        const message = { cameraNumber: 0, iframe: false, nalUnit: new Uint8Array(0) };
+        const message = { cameraNumber: 0, iframe: false, isParameterSet: false, nalUnit: new Uint8Array(0) };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<VideoMessage>(this, message, value);
@@ -55,7 +60,10 @@ class VideoMessage$Type extends MessageType<VideoMessage> {
                 case /* bool iframe */ 2:
                     message.iframe = reader.bool();
                     break;
-                case /* bytes nalUnit */ 3:
+                case /* bool isParameterSet */ 3:
+                    message.isParameterSet = reader.bool();
+                    break;
+                case /* bytes nalUnit */ 4:
                     message.nalUnit = reader.bytes();
                     break;
                 default:
@@ -76,9 +84,12 @@ class VideoMessage$Type extends MessageType<VideoMessage> {
         /* bool iframe = 2; */
         if (message.iframe !== false)
             writer.tag(2, WireType.Varint).bool(message.iframe);
-        /* bytes nalUnit = 3; */
+        /* bool isParameterSet = 3; */
+        if (message.isParameterSet !== false)
+            writer.tag(3, WireType.Varint).bool(message.isParameterSet);
+        /* bytes nalUnit = 4; */
         if (message.nalUnit.length)
-            writer.tag(3, WireType.LengthDelimited).bytes(message.nalUnit);
+            writer.tag(4, WireType.LengthDelimited).bytes(message.nalUnit);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
