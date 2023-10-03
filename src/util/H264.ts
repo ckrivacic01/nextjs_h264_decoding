@@ -1,4 +1,5 @@
 import { VideoMessage } from "@/generated/videomessage";
+import { Subject } from "rxjs";
 import { resolve } from "path";
 
 type DecoderOptions = {
@@ -11,11 +12,16 @@ export default class H264Decoder {
     private options : DecoderOptions
     decoder : VideoDecoder
     private currentTime: number = 23000000;
+    decodedFrame: Subject<VideoFrame> = new Subject<VideoFrame>();
 
     configuration: VideoDecoderConfig
     constructor(config: VideoDecoderConfig){
         this.options = {
-            output: (frame) => console.log("decoded frame",frame),
+            output: (frame) => {
+                console.log("decoded frame",frame)
+                //TODO: render the video frame to the screen.
+                this.decodedFrame.next(frame);
+            },
             error: (error) => {
                 console.log("decode errro", error)
                 console.log(error.message)
@@ -32,7 +38,7 @@ export default class H264Decoder {
 
     
     public sendFrame(frame: VideoMessage){
-        //todo: sps and pps need to go on the VideoDecoderConfig description
+        //sps and pps only need to go to the decoder config.description when using avc stream format. Otherwise they should be included with each IDR frame.
         const encodedFrame = new EncodedVideoChunk({
             type: frame.iframe ? "key" : "delta",
             data: frame.nalUnit,

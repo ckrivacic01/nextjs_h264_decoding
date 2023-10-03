@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import styles from './page.module.css'
-import { MouseEvent } from 'react';
+import { MouseEvent, useState, useRef } from 'react';
 
 import H264Decoder from '@/util/H264';
 import VideoConnection from '@/util/VideoConnection'
@@ -10,6 +10,8 @@ import { connect } from 'http2';
 export default function Home() {
   var decoder : H264Decoder;
   var connection : VideoConnection;
+  const [decodedImage, setDecodedImage] = useState<string>();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const handleDecodeInit = (e: MouseEvent<HTMLButtonElement>) => {
     decoder = setupDecoder(undefined);
 
@@ -38,13 +40,12 @@ export default function Home() {
     connection.frameSubject.subscribe((frame) => {
       console.log("send frame to decoder");
       decoder.sendFrame(frame);
-      // if(frame.isParameterSet){
-      //   decoder = setupDecoder(frame.nalUnit)
-      // }else{
-      //   decoder.sendFrame(frame);
-      // }
     });
 
+    decoder.decodedFrame.subscribe((frame) => {
+      canvasRef.current?.getContext('2d')?.drawImage(frame, 0, 0);
+      frame.close();
+    });
   }
 
   const stopConnection = (e: MouseEvent<HTMLButtonElement>) => {
@@ -58,6 +59,8 @@ export default function Home() {
     <p>test</p>
     <button onClick={startConnection}>Connect</button>
     <button onClick={stopConnection}>Disconnect</button>
+    <canvas ref={canvasRef} width={1000} height={1000}/>
+    
    </div>
   )
 }

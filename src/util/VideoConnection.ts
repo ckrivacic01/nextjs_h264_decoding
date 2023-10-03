@@ -8,7 +8,7 @@ class VideoConnection{
     token: string
     frameSubject: Subject<VideoMessage>
     constructor(){
-        this.token = 'eyJraWQiOiJWQ1MiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJWQ1MiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTcyNzgxNTAwNywiaWF0IjoxNjk2Mjc5MDA3fQ.GhH8r-i6RaLqlFG4fwFH5bC2CTuMynlfi8uw9R424wn0l_LgWWfs6kzGZsrixYCphNFG87kAxzZEwbgxajYiMQ'
+        this.token = 'eyJraWQiOiJWQ1MiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJWQ1MiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTcyNzg4MTMyNywiaWF0IjoxNjk2MzQ1MzI3fQ.dYDP5JQ1dwbfYgZ2eZ4GehpIZ6ojJNd68En3fnpfcw20AisMzspigtWZDCW2t_pWHeEz88LJ6hwnvfEe0zNpMQ'
         this.url = `ws://localhost:80/api/v1/video?access_token=${this.token}`
         this.socket = new WebSocket(this.url);
         this.frameSubject = new Subject<VideoMessage>();
