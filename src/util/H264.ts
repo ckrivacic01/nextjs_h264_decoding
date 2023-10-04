@@ -49,5 +49,6 @@ export default class H264Decoder {
         });
         this.decoder.decode(encodedFrame)
     };
+
     }
 

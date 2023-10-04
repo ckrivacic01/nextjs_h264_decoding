@@ -8,6 +8,7 @@ import { VideoMessage } from "@/generated/videomessage";
 
 type H264PlayerProps = {
     frameObservable: Observable<VideoMessage>
+    size: number
 }
 
 function H264Player(props: H264PlayerProps){
@@ -35,8 +36,8 @@ function H264Player(props: H264PlayerProps){
 
         console.log("subscribing to decoder frame observable");
         decoder.decodedFrame.subscribe((frame) => {
-          canvasRef.current?.getContext('2d')?.drawImage(frame, 0, 0);
-          setDim({width: frame.displayWidth, height: frame.displayHeight});
+          canvasRef.current?.getContext('2d')?.drawImage(frame, 0, 0, props.size, props.size);
+          // setDim({width: frame.displayWidth, height: frame.displayHeight});
           setTotalFrames(totalFrames + 1);
           frame.close();
         });
@@ -46,10 +47,12 @@ function H264Player(props: H264PlayerProps){
         .subscribe((videoMessage) => {
             decoder.sendFrame(videoMessage);
         });
+
+        return () => decoder.decoder.close();
       },[]);
 
 
-    const [dim, setDim] = useState({width: 0, height: 0});
+    // const [dim, setDim] = useState({width: 0, height: 0});
     const [totalFrames, setTotalFrames] = useState(0);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -72,7 +75,7 @@ function H264Player(props: H264PlayerProps){
   return(
     <div>
         <p>frames: {totalFrames}</p>
-        <canvas ref={canvasRef} width={dim.width} height={dim.height}/>
+        <canvas ref={canvasRef} width={props.size} height={props.size}/>
     </div>
   )
 
