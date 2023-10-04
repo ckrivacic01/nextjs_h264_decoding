@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.11",
     "@protobuf-ts/plugin": "^2.9.1",
     "@protobuf-ts/runtime": "^2.9.1",
     "mp4box": "^0.5.2",

@@ -1,3 +1,4 @@
+'use client'
 import { VideoMessage } from "@/generated/videomessage";
 import { Subject } from "rxjs";
 import { resolve } from "path";
@@ -27,6 +28,7 @@ export default class H264Decoder {
                 console.log(error.message)
             }
         }
+        console.log("H264Decoder created")
         this.decoder = new VideoDecoder(this.options);
         this.configuration = config;
 
