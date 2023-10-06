@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, use } from "react";
-import { Observable } from "rxjs";
+import { Observable, animationFrameScheduler, observeOn } from "rxjs";
 
 import H264Decoder from "@/util/H264";
 import { VideoMessage } from "@/generated/videomessage";
@@ -13,7 +13,10 @@ type H264PlayerProps = {
 
 function H264Player(props: H264PlayerProps){
 
-    
+  const [totalFrames, setTotalFrames] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [fps, setFps] = useState(0);
+  const fpsCalculationRef = useRef({startTime: 0});
 
     const setupDecoder = (parameterSets: Uint8Array | undefined) : H264Decoder => {
         var lDecoder : H264Decoder;
@@ -33,12 +36,16 @@ function H264Player(props: H264PlayerProps){
       
       useEffect(() => {
         const decoder = setupDecoder(undefined);
-
+        var startTime : number = 0;
+    
         console.log("subscribing to decoder frame observable");
-        decoder.decodedFrame.subscribe((frame) => {
+        decoder.decodedFrame.pipe(observeOn(animationFrameScheduler)).subscribe((frame) => {
+  
+          const now = performance.now();
           canvasRef.current?.getContext('2d')?.drawImage(frame, 0, 0, props.size, props.size);
           // setDim({width: frame.displayWidth, height: frame.displayHeight});
-          setTotalFrames(totalFrames + 1);
+          var newFrames = totalFrames + 1;
+          setTotalFrames(n => n + 1);
           frame.close();
         });
 
@@ -51,30 +58,24 @@ function H264Player(props: H264PlayerProps){
         return () => decoder.decoder.close();
       },[]);
 
-
-    // const [dim, setDim] = useState({width: 0, height: 0});
-    const [totalFrames, setTotalFrames] = useState(0);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    //listen for decoded frames and draw them to the canvas
-    // decoderRef.current.decodedFrame.subscribe((frame) => {
-    //     canvasRef.current?.getContext('2d')?.drawImage(frame, 0, 0);
-    //     setDim({width: frame.displayWidth, height: frame.displayHeight});
-    //     setTotalFrames(totalFrames + 1);
-    //     //release resources held by the frame
-    //     // frame.close();
-    // });
-    
-    //incoming frames will go to the decoder. Decoder will emmit VideoFrames when they are ready
-    // props.frameObservable
-    // .subscribe((videoMessage) => {
-    //     decoderRef.current.sendFrame(videoMessage);
-    // });
-        
+      useEffect(() => {
+        if (fpsCalculationRef.current.startTime == 0) {
+          fpsCalculationRef.current.startTime = performance.now();
+        } else {
+          const elapsed = (performance.now() - fpsCalculationRef.current.startTime) / 1000;
+          const fps = totalFrames / elapsed;
+          console.log("fps=" + fps + "totalFrames=" + totalFrames)
+          // setStatus("render", `${fps.toFixed(0)} fps`);
+          setFps(fps);
+        }
+        console.log("totalframes changed" +totalFrames)
+      }, [totalFrames]);
+  
 
   return(
     <div>
         <p>frames: {totalFrames}</p>
+        <p>FPS: {fps.toFixed(0)}</p>
         <canvas ref={canvasRef} width={props.size} height={props.size}/>
     </div>
   )
