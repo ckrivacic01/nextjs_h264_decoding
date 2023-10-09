@@ -6,6 +6,7 @@ import VideoConnection from '@/util/VideoConnection'
 import H264Player from '@/component/H264Player';
 import { Observable, Subject, map, range, toArray } from 'rxjs';
 import { Button, Grid, TextField } from '@mui/material';
+import Link from 'next/link';
 
 export default function Home() {
   var connection: VideoConnection;
@@ -33,6 +34,9 @@ export default function Home() {
   const observable = frameSubject.asObservable();
   return (
     <div>
+     
+      <Link href={"/settings"}>Settings</Link>
+      
       <Button variant="contained" onClick={startConnection}>Connect</Button>
       <Button variant="outlined" onClick={stopConnection}>Disconnect</Button>
       <TextField id="outlined-basic" label="number of cameras" variant="outlined" value={totalCameras} onChange={(e) => setTotalCameras(e.target.value)} />
