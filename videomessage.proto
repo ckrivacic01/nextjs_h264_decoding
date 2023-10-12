@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "vcsserver.web.push.websocket.video";
+option java_outer_classname = "VideoH264Message";
+
+message VideoMessage{
+  //stream identifier
+  VideoStreamKey videoStreamKey = 1;
+  //one or the other depending on the codec.
+  oneof frame {
+    H264VideoMessage h264VideoMessage = 2;
+    MJPEGImage mjpegImage = 3;
+  }
+}
+
+//the nal unit message for h264
+message H264VideoMessage{
+  bool iframe = 1;
+  bool isParameterSet = 2;
+  bytes nalUnit = 3;
+}
+
+// the jpeg image bytes
+message MJPEGImage{
+  bytes image = 1;
+}
+
+message VideoStreamKey{
+  int32 cameraNumber = 1;
+  bool scaled = 2;
+}

@@ -1,17 +1,16 @@
 'use client'
 import { MouseEvent, useState, useRef, use } from 'react';
 
-import { VideoMessage } from '@/generated/videomessage';
+import { H264VideoMessage, VideoMessage } from '@/generated/videomessage';
 import VideoConnection from '@/util/VideoConnection'
 import H264Player from '@/component/H264Player';
 import { Observable, Subject, map, range, toArray } from 'rxjs';
 import { Button, Grid, TextField } from '@mui/material';
-import Link from 'next/link';
 
 export default function Home() {
   var connection: VideoConnection;
   const [totalCameras, setTotalCameras] = useState("1");
-  const frameSubject: Subject<VideoMessage> = new Subject<VideoMessage>();
+  const frameSubject: Subject<H264VideoMessage> = new Subject<H264VideoMessage>();
 
 
   const startConnection = (e: MouseEvent<HTMLButtonElement>) => {
@@ -34,9 +33,6 @@ export default function Home() {
   const observable = frameSubject.asObservable();
   return (
     <div>
-     
-      <Link href={"/settings"}>Settings</Link>
-      
       <Button variant="contained" onClick={startConnection}>Connect</Button>
       <Button variant="outlined" onClick={stopConnection}>Disconnect</Button>
       <TextField id="outlined-basic" label="number of cameras" variant="outlined" value={totalCameras} onChange={(e) => setTotalCameras(e.target.value)} />

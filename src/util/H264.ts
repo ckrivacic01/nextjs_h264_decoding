@@ -1,5 +1,5 @@
 'use client'
-import { VideoMessage } from "@/generated/videomessage";
+import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
 import { Subject } from "rxjs";
 import { resolve } from "path";
 
@@ -39,7 +39,7 @@ export default class H264Decoder {
 
 
     
-    public sendFrame(frame: VideoMessage){
+    public sendFrame(frame: H264VideoMessage){
         //sps and pps only need to go to the decoder config.description when using avc stream format. Otherwise they should be included with each IDR frame.
         const encodedFrame = new EncodedVideoChunk({
             type: frame.iframe ? "key" : "delta",

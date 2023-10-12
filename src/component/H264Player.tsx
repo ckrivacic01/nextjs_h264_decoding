@@ -4,10 +4,10 @@ import { useRef, useState, useEffect, use } from "react";
 import { Observable, animationFrameScheduler, observeOn } from "rxjs";
 
 import H264Decoder from "@/util/H264";
-import { VideoMessage } from "@/generated/videomessage";
+import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
 
 type H264PlayerProps = {
-    frameObservable: Observable<VideoMessage>
+    frameObservable: Observable<H264VideoMessage>
     size: number
 }
 
