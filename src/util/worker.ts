@@ -28,7 +28,7 @@ const loopworker = () => {
         const canvas = e.data.canvas
         const decoder = new H264Decoder(e.data.config);
         observable.subscribe((frame: VideoMessage) => {
-            decoder.sendFrame(frame);
+            // decoder.sendFrame(frame);
         });
     
         decoder.decodedFrame.subscribe((frame: VideoFrame) => {
