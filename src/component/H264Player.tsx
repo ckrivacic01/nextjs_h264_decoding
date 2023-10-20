@@ -1,14 +1,15 @@
 'use client';
 
 import { useRef, useState, useEffect, use } from "react";
-import { Observable, animationFrameScheduler, observeOn } from "rxjs";
+import { Observable, animationFrameScheduler, filter, map, observeOn } from "rxjs";
 
 import H264Decoder from "@/util/H264";
 import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
 
 type H264PlayerProps = {
-    frameObservable: Observable<H264VideoMessage>
-    size: number
+    frameObservable: Observable<VideoMessage>
+    size: number,
+    cameraNumber: number,
 }
 
 function H264Player(props: H264PlayerProps){
@@ -51,12 +52,26 @@ function H264Player(props: H264PlayerProps){
 
         console.log("subscrining to frame observable");
         props.frameObservable
+        .pipe(
+          filter((videoMessage) => videoMessage.videoStreamKey?.cameraNumber == props.cameraNumber),
+          map((videoMessage) => {
+            const h264VideoMessage = videoMessage.frame;
+                        if(h264VideoMessage.oneofKind == "h264VideoMessage"){
+                            const message = h264VideoMessage.h264VideoMessage;
+                            console.log(`got video message iframe=${message.iframe} camera=${videoMessage.videoStreamKey?.cameraNumber} nalUnitSize=${message.nalUnit.length} isParameterSet=${message.isParameterSet}`);
+                            return message;
+                        }
+          }),
+        )
         .subscribe((videoMessage) => {
+          if(videoMessage){
+            console.log("sending frame to decoder")
             decoder.sendFrame(videoMessage);
+          }
         });
 
         return () => decoder.decoder.close();
-      },[]);
+      },[props.cameraNumber]);
 
       useEffect(() => {
         if (fpsCalculationRef.current.startTime == 0) {
@@ -74,6 +89,7 @@ function H264Player(props: H264PlayerProps){
 
   return(
     <div>
+        <p>cameraNumber{props.cameraNumber}</p>
         <p>frames: {totalFrames}</p>
         <p>FPS: {fps.toFixed(0)}</p>
         <canvas ref={canvasRef} width={props.size} height={props.size}/>
