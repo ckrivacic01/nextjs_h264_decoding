@@ -34,7 +34,7 @@ class VideoConnection{
     constructor(host: string, port: number){
         this.host = host;
         this.port = port;
-        this.context = new VcsServerContext({host: host, port: 80})
+        this.context = new VcsServerContext({host: host, port: 443, wsSchema: "wss", httpSchema: "https"})
         this.subscriptionService = new SubscriptionService(this.context);
         this.login()
         .then(() => this.connectToVideoApi());
