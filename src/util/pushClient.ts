@@ -9,7 +9,7 @@ export class PushClient{
     url: string
     messageSubject: Subject<MessageEvent>
     constructor(context: VcsServerContext){
-        this.url = `ws://${context.host}/api/v1/video?access_token=${context.userSession.token}`;
+        this.url = `${context.wsSchema}://${context.host}/api/v1/video?access_token=${context.userSession.token}`;
 
         this.messageSubject = webSocket({
             url: this.url,
