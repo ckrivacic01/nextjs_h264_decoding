@@ -15,6 +15,7 @@ export default function Home() {
   const [totalCameras, setTotalCameras] = useState("1");
   const [cameraNumber, setCameraNumber] = useState<number>(2)
   const [server, setHost] = useState<string>(host)
+
   const frameSubject: Subject<VideoMessage> = new Subject<VideoMessage>()
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function Home() {
       <TextField id="outlined-basic" label="number of cameras" variant="outlined" value={totalCameras} onChange={(e) => setTotalCameras(e.target.value)} />
       <TextField id="outlined-basic" label="camera number" variant="outlined" value={cameraNumber} onChange={(e) => setCameraNumber(Number(e.target.value))} />
       <TextField id="outlined-basic" label="server" variant="outlined" value={server} onChange={(e) => setHost(e.target.value)} />
+
 
 
       <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
