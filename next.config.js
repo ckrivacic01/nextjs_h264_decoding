@@ -13,7 +13,8 @@ const nextConfig = {
             }
         ]
     },
-    reactStrictMode: false
+    reactStrictMode: false,
+    output: 'standalone',
 }
 
 module.exports = nextConfig
