@@ -50,10 +50,9 @@ function H264Player(props: H264PlayerProps){
           frame.close();
         });
 
-        console.log("subscrining to frame observable");
-        props.frameObservable
+        console.log("subscribing to frame observable");
+        const subscription = props.frameObservable
         .pipe(
-          filter((videoMessage) => videoMessage.videoStreamKey?.cameraNumber == props.cameraNumber),
           map((videoMessage) => {
             const h264VideoMessage = videoMessage.frame;
                         if(h264VideoMessage.oneofKind == "h264VideoMessage"){
@@ -70,7 +69,10 @@ function H264Player(props: H264PlayerProps){
           }
         });
 
-        return () => decoder.decoder.close();
+        return () => {
+          decoder.decoder.close();
+          subscription.unsubscribe();
+        };
       },[props.cameraNumber]);
 
       useEffect(() => {

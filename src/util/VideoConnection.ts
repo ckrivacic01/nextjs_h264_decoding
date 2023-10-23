@@ -1,10 +1,8 @@
 import { Subject, Subscription as RxSubscription} from "rxjs";
-import { VcsServerContext, VideoMessage } from "@acuity-vct/vcs-client-api/dist";
+import { VcsServerContext, VideoMessage, StreamMessageToClient } from "@acuity-vct/vcs-client-api/dist";
 import { VcsRestAuthenticate } from "@acuity-vct/vcs-client-api/dist";
 import { PushClient } from "./pushClient";
 import { SubscriptionService } from "./SubscriptionService";
-import { StreamMessageToClient } from "@acuity-vct/vcs-client-api/dist";
-
 
 
 
