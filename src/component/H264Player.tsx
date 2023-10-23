@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, use } from "react";
 import { Observable, animationFrameScheduler, filter, map, observeOn } from "rxjs";
 
 import H264Decoder from "@/util/H264";
-import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
+import { VideoMessage } from "@acuity-vct/vcs-client-api/dist";
 
 type H264PlayerProps = {
     frameObservable: Observable<VideoMessage>

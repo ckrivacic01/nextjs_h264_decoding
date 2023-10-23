@@ -1,5 +1,5 @@
 'use client'
-import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
+import { H264VideoMessage } from "@acuity-vct/vcs-client-api/dist";
 import { Subject } from "rxjs";
 import { resolve } from "path";
 

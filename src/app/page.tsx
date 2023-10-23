@@ -1,19 +1,20 @@
 'use client'
 import { MouseEvent, useState, useRef, use, useEffect } from 'react';
 
-import { H264VideoMessage, VideoMessage } from '@/generated/videomessage';
+import { VideoMessage } from '@acuity-vct/vcs-client-api/dist';
 import VideoConnection from '@/util/VideoConnection'
 import H264Player from '@/component/H264Player';
 import { Observable, Subject, connectable, map, merge, range, toArray } from 'rxjs';
 import { Button, Grid, TextField } from '@mui/material';
 
 const host : string = "192.168.2.44"
-const port : number = 80;
+const port : number = 443;
 
 export default function Home() {
   var connection: VideoConnection;
   const [totalCameras, setTotalCameras] = useState("1");
   const [cameraNumber, setCameraNumber] = useState<number>(2)
+  const [server, setHost] = useState<string>(host)
   const frameSubject: Subject<VideoMessage> = new Subject<VideoMessage>()
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function Home() {
 
 
   const startConnection = (e: MouseEvent<HTMLButtonElement>) => {
-    connection = new VideoConnection(host, port)
+    connection = new VideoConnection(server, port, cameraNumber)
     // decoder = setupDecoder(undefined)
     connection.frameSubject.subscribe((frame) => {
       console.log("publishing video frame on frameSubject");
@@ -45,6 +46,7 @@ export default function Home() {
       <Button variant="outlined" onClick={stopConnection}>Disconnect</Button>
       <TextField id="outlined-basic" label="number of cameras" variant="outlined" value={totalCameras} onChange={(e) => setTotalCameras(e.target.value)} />
       <TextField id="outlined-basic" label="camera number" variant="outlined" value={cameraNumber} onChange={(e) => setCameraNumber(Number(e.target.value))} />
+      <TextField id="outlined-basic" label="server" variant="outlined" value={server} onChange={(e) => setHost(e.target.value)} />
 
 
       <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>

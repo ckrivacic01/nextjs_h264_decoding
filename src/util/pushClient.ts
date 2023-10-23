@@ -1,6 +1,5 @@
 import { VcsServerContext } from '@acuity-vct/vcs-client-api/dist'
 import { Observable, Subject } from "rxjs"
-import { VideoMessage } from "@/generated/videomessage"
 import { WebSocketSubject, webSocket } from "rxjs/webSocket"
 import { WebSocketMessage } from "rxjs/internal/observable/dom/WebSocketSubject"
 
