@@ -5,9 +5,6 @@ import { PushClient } from "./pushClient";
 import { SubscriptionService } from "./SubscriptionService";
 import { StreamMessageToClient } from "@acuity-vct/vcs-client-api/dist";
 
-
-
-
 export type VideoSubscriptionSpec = {
     videoStreamKey: VideoStreamKey,
     codec: string
@@ -36,6 +33,7 @@ class VideoConnection{
         this.port = port;
         this.cameraNumber = camera;
         this.context = new VcsServerContext({host: host, port: port, wsSchema: "wss", httpSchema: "https"})
+
         this.subscriptionService = new SubscriptionService(this.context);
         this.login()
         .then(() => this.connectToVideoApi());
@@ -54,6 +52,7 @@ class VideoConnection{
             spec: {
                 videoStreamKey: {
                     cameraNumber: this.cameraNumber,
+
                     scaled: true
                 },
                 codec: "h264"
@@ -90,6 +89,7 @@ class VideoConnection{
                             this.frameSubject.next(vm);
 
                         }
+
                     });
                     
                 }else{
