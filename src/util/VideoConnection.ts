@@ -1,13 +1,8 @@
-
-import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
 import { Subject, Subscription as RxSubscription} from "rxjs";
-import { VcsServerContext } from "@acuity-vct/vcs-client-api/dist";
+import { VcsServerContext, VideoMessage, StreamMessageToClient } from "@acuity-vct/vcs-client-api/dist";
 import { VcsRestAuthenticate } from "@acuity-vct/vcs-client-api/dist";
 import { PushClient } from "./pushClient";
 import { SubscriptionService } from "./SubscriptionService";
-
-
-
 
 export type VideoSubscriptionSpec = {
     videoStreamKey: VideoStreamKey,
@@ -31,10 +26,13 @@ class VideoConnection{
     private host: string
     private port: number
     subscriptionService: SubscriptionService
-    constructor(host: string, port: number){
+    cameraNumber: number
+    constructor(host: string, port: number, camera: number){
         this.host = host;
         this.port = port;
-        this.context = new VcsServerContext({host: host, port: 443, wsSchema: "wss", httpSchema: "https"})
+        this.cameraNumber = camera;
+        this.context = new VcsServerContext({host: host, port: port, wsSchema: "wss", httpSchema: "https"})
+
         this.subscriptionService = new SubscriptionService(this.context);
         this.login()
         .then(() => this.connectToVideoApi());
@@ -52,7 +50,8 @@ class VideoConnection{
             category: "video",
             spec: {
                 videoStreamKey: {
-                    cameraNumber: 2,
+                    cameraNumber: this.cameraNumber,
+
                     scaled: true
                 },
                 codec: "h264"
@@ -83,8 +82,13 @@ class VideoConnection{
                         return new Uint8Array(buffer);
                     })
                     .then((uint8Array) => {
-                        const videomessage = VideoMessage.fromBinary(uint8Array);
-                        this.frameSubject.next(videomessage);
+                        const message = StreamMessageToClient.fromBinary(uint8Array);
+                        if(message.data.oneofKind == "videoMessage"){
+                            const vm = message.data.videoMessage;
+                            this.frameSubject.next(vm);
+
+                        }
+
                     });
                     
                 }else{

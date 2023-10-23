@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, use } from "react";
 import { Observable, animationFrameScheduler, filter, map, observeOn } from "rxjs";
 
 import H264Decoder from "@/util/H264";
-import { H264VideoMessage, VideoMessage } from "@/generated/videomessage";
+import { VideoMessage } from "@acuity-vct/vcs-client-api/dist";
 
 type H264PlayerProps = {
     frameObservable: Observable<VideoMessage>
@@ -50,10 +50,9 @@ function H264Player(props: H264PlayerProps){
           frame.close();
         });
 
-        console.log("subscrining to frame observable");
-        props.frameObservable
+        console.log("subscribing to frame observable");
+        const subscription = props.frameObservable
         .pipe(
-          filter((videoMessage) => videoMessage.videoStreamKey?.cameraNumber == props.cameraNumber),
           map((videoMessage) => {
             const h264VideoMessage = videoMessage.frame;
                         if(h264VideoMessage.oneofKind == "h264VideoMessage"){
@@ -70,7 +69,10 @@ function H264Player(props: H264PlayerProps){
           }
         });
 
-        return () => decoder.decoder.close();
+        return () => {
+          decoder.decoder.close();
+          subscription.unsubscribe();
+        };
       },[props.cameraNumber]);
 
       useEffect(() => {
