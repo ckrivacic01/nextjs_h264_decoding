@@ -1,11 +1,12 @@
 'use client'
 import { MouseEvent, useState, useRef, use, useEffect } from 'react';
-
+import Link from 'next/link'
 import { VideoMessage } from '@acuity-vct/vcs-client-api/dist';
 import VideoConnection from '@/util/VideoConnection'
 import H264Player from '@/component/H264Player';
 import { Observable, Subject, connectable, map, merge, range, toArray } from 'rxjs';
 import { Button, Grid, TextField } from '@mui/material';
+
 
 const host : string = "192.168.2.44"
 const port : number = 443;
@@ -42,7 +43,7 @@ export default function Home() {
   const observable = frameSubject.asObservable();
   return (
     <div>
-
+      <Link href="/review">Review</Link>
       <Button variant="contained" onClick={startConnection}>Connect</Button>
       <Button variant="outlined" onClick={stopConnection}>Disconnect</Button>
       <TextField id="outlined-basic" label="number of cameras" variant="outlined" value={totalCameras} onChange={(e) => setTotalCameras(e.target.value)} />
