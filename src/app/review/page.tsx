@@ -7,7 +7,8 @@ import { from } from "rxjs";
 import { ArtsentryEvent } from "@/component/types";
 import { HLSPlayerProps } from "@/component/types";
 import { PlayBackService } from "@/util/PlaybackService";
-import { VcsRestAuthenticate, VcsServerContext } from "@acuity-vct/vcs-client-api/dist";
+import { VcsRestAuthenticate, VcsServerContext, VcsWsConnector, SessionEvent, SessionEventType, SubscriptionApi, VcsSubscriptionCategory, EventProcessor } from "@acuity-vct/vcs-client-api/dist";
+
 
 
 
@@ -31,43 +32,80 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
             video.play();
           });
         }
+
+        return () => {
+          if(videoRef.current){
+            video.removeAttribute('src');
+            video.load();
+          }
+        }
     }, [src]);
-    return <video ref={videoRef} controls />
+    return <video ref={videoRef} controls width={500} height={500}/>
 };
-const serverContext = new VcsServerContext({host: "localhost", port:443, httpSchema:"https"});
+const serverContext = new VcsServerContext({host: "192.168.2.44", port:443, httpSchema:"https", wsSchema: "wss"});
+const wsVcs = new VcsWsConnector(serverContext);
+const eventProcessor = new EventProcessor(wsVcs);
+  
 export default function Review() {
   const [eventUrl, setEventUrl] = React.useState<string>();
   
-    const events = [
-      { type: "motion", recId: "1234" },
-      { type: "lighting", recId: "4321" },
-    ]
+  useEffect(() => {
+    console.log("Review page useEffect setting up connections");
+    setupConnections();
+  }, []);
+
     return(
         <div>
             <h1>Event Review</h1>
-              
+            <p>playbackUrl:{eventUrl}</p>
             {eventUrl && <HLSPlayer src={eventUrl}/> }
             
-            <EventList events={events} eventClick={(e) => eventSelected(e, setEventUrl)} />
+            <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} />
         </div>
     )
 }
 
+function setupConnections(){
+  if(!serverContext.userSession.isLoggedIn()){
+    const authApi = new VcsRestAuthenticate(serverContext);
+
+    authApi.login("admin", "system")
+  .then(() => {
+   
+    const session = wsVcs.subscribeSession(event => {
+      if (event.type === SessionEventType.NewSession) {
+        const sessionId: string = event.data;
+        const subscriptions = new SubscriptionApi({
+          accessToken: serverContext.userSession.token,
+          basePath: `${serverContext.httpSchema}://${serverContext.host}:${serverContext.port}`
+        });
+        subscriptions.addSubscription({
+          category: VcsSubscriptionCategory.Event,
+          spec: {}
+        }, sessionId)
+          .then(response => {
+            console.log("addSubscription response " + JSON.stringify(response));
+          })
+          .catch(err => {
+            console.error("addSubscription error " + err);
+          });
+      } else {
+        console.log("session event: " + JSON.stringify(event));
+      }
+    });
+    
+    wsVcs.connect("/api/v1/push");
+  })
+  .catch(err => console.error(err.message));
+  }
+}
+
 function eventSelected(event: ArtsentryEvent, setPlaybackUrl: (url: string) => void): void{
-  // event.recId = '1688584326689:VCS_DEV_INT_4'
-  event.recId= '1666989609324:test'
   console.log(`event selected id=${event.recId}`);
   const playbackService = new PlayBackService(serverContext);
   if(!serverContext.userSession.isLoggedIn()){
     console.log("not logged in");
-    new VcsRestAuthenticate(serverContext).login("admin", "system").then((session) => {
-      playbackService.reviewEvent(event).then((srcUrl) => {
-        console.log(`srcUrl=${srcUrl}`);
-        setPlaybackUrl(srcUrl)
-      });
-    });
   }else{
-    
     playbackService.reviewEvent(event).then((srcUrl) => {
       console.log(`srcUrl=${srcUrl}`);
       setPlaybackUrl(srcUrl);

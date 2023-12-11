@@ -1,6 +1,8 @@
+import { EventProcessor } from "@acuity-vct/vcs-client-api/dist";
+
 export interface EventListProps {
-    events: ArtsentryEvent[];
     eventClick: (event: ArtsentryEvent) => void;
+    eventProcessor: EventProcessor;
 }
   
 export interface ArtsentryEvent{
