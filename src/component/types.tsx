@@ -9,6 +9,8 @@ export interface ArtsentryEvent{
       type: string;
       recId: string;
       description: string;
+      startTime?: Date;
+      endTime?: Date;
 }
 
 export interface HLSPlayerProps{

@@ -53,17 +53,17 @@ const eventProcessor = new EventProcessor(wsVcs);
   
 export default function Review() {
   const [eventUrl, setEventUrl] = React.useState<string>();
-
+  const [loggedIn, setLoggedIn] = React.useState<boolean>(false)
   useEffect(() => {
     console.log("Review page useEffect setting up connections");
-    setupConnections();
+    setupConnections().then(() => setLoggedIn(true));
   }, []);
 
   return (
     <div>
       <h1>Event Review</h1>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} />
+        {loggedIn && <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} /> }
         <div>
           <p>playbackUrl:{eventUrl}</p>
           {eventUrl && <HLSPlayer src={eventUrl} />}
@@ -74,39 +74,47 @@ export default function Review() {
   )
 }
 
-function setupConnections(){
-  if(!serverContext.userSession.isLoggedIn()){
-    const authApi = new VcsRestAuthenticate(serverContext);
-
-    authApi.login("admin", "system")
-  .then(() => {
-   
-    const session = wsVcs.subscribeSession(event => {
-      if (event.type === SessionEventType.NewSession) {
-        const sessionId: string = event.data;
-        const subscriptions = new SubscriptionApi({
-          accessToken: serverContext.userSession.token,
-          basePath: `${serverContext.httpSchema}://${serverContext.host}:${serverContext.port}`
-        });
-        subscriptions.addSubscription({
-          category: VcsSubscriptionCategory.Event,
-          spec: {}
-        }, sessionId)
-          .then(response => {
-            console.log("addSubscription response " + JSON.stringify(response));
-          })
-          .catch(err => {
-            console.error("addSubscription error " + err);
+function setupConnections() : Promise<void>{
+  return new Promise((resolve, reject) => {
+    if(!serverContext.userSession.isLoggedIn()){
+      const authApi = new VcsRestAuthenticate(serverContext);
+  
+      authApi.login("admin", "system")
+    .then(() => {
+     
+      const session = wsVcs.subscribeSession(event => {
+        if (event.type === SessionEventType.NewSession) {
+          const sessionId: string = event.data;
+          const subscriptions = new SubscriptionApi({
+            accessToken: serverContext.userSession.token,
+            basePath: `${serverContext.httpSchema}://${serverContext.host}:${serverContext.port}`
           });
-      } else {
-        console.log("session event: " + JSON.stringify(event));
-      }
+          subscriptions.addSubscription({
+            category: VcsSubscriptionCategory.Event,
+            spec: {}
+          }, sessionId)
+            .then(response => {
+              console.log("addSubscription response " + JSON.stringify(response));
+            })
+            .catch(err => {
+              console.error("addSubscription error " + err);
+            });
+          resolve();
+        } else {
+          console.log("session event: " + JSON.stringify(event));
+        }
+      });
+      
+      wsVcs.connect("/api/v1/push");
+    })
+    .catch(err => {
+      console.error(err.message)
+      reject(err);
     });
     
-    wsVcs.connect("/api/v1/push");
-  })
-  .catch(err => console.error(err.message));
-  }
+    }
+  });
+  
 }
 
 function eventSelected(event: ArtsentryEvent, setPlaybackUrl: (url: string) => void): void{

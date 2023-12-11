@@ -37,6 +37,7 @@ const EventList: React.FC<EventListProps> = ({ eventClick, eventProcessor }) => 
 };
 
 const EventInformation : React.FC<{event: ArtsentryEvent, eventClick: (event: ArtsentryEvent) => void}> = ({event, eventClick}) => {
+
     return (
         <div>
             <p>Event type: {event.type}</p>
