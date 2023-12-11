@@ -21,10 +21,16 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
         const video = videoRef.current;
     
         if (Hls.isSupported()) {
+          console.log("HLS supported loading source=" + src);
           hls.loadSource(src);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            console.log("manifest parsed")
             video.play();
+          });
+
+          hls.on(Hls.Events.ERROR, function (event, data) {
+            console.log("HLS error event=" + event + " data=" + JSON.stringify(data));
           });
           hlsRef.current = hls;
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -40,6 +46,7 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
             video.load();
           }
           if(hlsRef.current){
+            console.log("destroying current hls ref")
             hlsRef.current.destroy();
             hlsRef.current = null;
           }
@@ -47,7 +54,7 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     }, [src]);
     return <video ref={videoRef} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
 };
-const serverContext = new VcsServerContext({host: "192.168.2.44", port:443, httpSchema:"https", wsSchema: "wss"});
+const serverContext = new VcsServerContext({host: "192.168.2.44", port:80, httpSchema:"http", wsSchema: "ws"});
 const wsVcs = new VcsWsConnector(serverContext);
 const eventProcessor = new EventProcessor(wsVcs);
   
@@ -87,7 +94,7 @@ function setupConnections() : Promise<void>{
           const sessionId: string = event.data;
           const subscriptions = new SubscriptionApi({
             accessToken: serverContext.userSession.token,
-            basePath: `${serverContext.httpSchema}://${serverContext.host}:${serverContext.port}`
+            basePath: serverContext.basePath
           });
           subscriptions.addSubscription({
             category: VcsSubscriptionCategory.Event,
@@ -125,7 +132,9 @@ function eventSelected(event: ArtsentryEvent, setPlaybackUrl: (url: string) => v
   }else{
     playbackService.reviewEvent(event).then((srcUrl) => {
       console.log(`srcUrl=${srcUrl}`);
-      setPlaybackUrl(srcUrl);
+      //hack to allow the server to create the playlist. Server returns imediatly while playlist is not created yet
+      new Promise(resolve => setTimeout(resolve, 1000)).then(() => setPlaybackUrl(srcUrl));
+      
     });
   }
   
