@@ -8,6 +8,7 @@ export interface EventListProps {
 export interface ArtsentryEvent{
       type: string;
       recId: string;
+      description: string;
 }
 
 export interface HLSPlayerProps{

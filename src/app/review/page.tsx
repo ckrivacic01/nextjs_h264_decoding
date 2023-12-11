@@ -14,7 +14,7 @@ import { VcsRestAuthenticate, VcsServerContext, VcsWsConnector, SessionEvent, Se
 
 const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-
+    const hlsRef = useRef<Hls | null>(null);
     useEffect(() => {
         if (!videoRef.current) return;
         const hls = new Hls();
@@ -26,6 +26,7 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
           hls.on(Hls.Events.MANIFEST_PARSED, function () {
             video.play();
           });
+          hlsRef.current = hls;
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           video.src = src;
           video.addEventListener('loadedmetadata', function () {
@@ -38,9 +39,13 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
             video.removeAttribute('src');
             video.load();
           }
+          if(hlsRef.current){
+            hlsRef.current.destroy();
+            hlsRef.current = null;
+          }
         }
     }, [src]);
-    return <video ref={videoRef} controls width={500} height={500}/>
+    return <video ref={videoRef} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
 };
 const serverContext = new VcsServerContext({host: "192.168.2.44", port:443, httpSchema:"https", wsSchema: "wss"});
 const wsVcs = new VcsWsConnector(serverContext);
@@ -48,21 +53,25 @@ const eventProcessor = new EventProcessor(wsVcs);
   
 export default function Review() {
   const [eventUrl, setEventUrl] = React.useState<string>();
-  
+
   useEffect(() => {
     console.log("Review page useEffect setting up connections");
     setupConnections();
   }, []);
 
-    return(
+  return (
+    <div>
+      <h1>Event Review</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} />
         <div>
-            <h1>Event Review</h1>
-            <p>playbackUrl:{eventUrl}</p>
-            {eventUrl && <HLSPlayer src={eventUrl}/> }
-            
-            <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} />
+          <p>playbackUrl:{eventUrl}</p>
+          {eventUrl && <HLSPlayer src={eventUrl} />}
         </div>
-    )
+
+      </div>
+    </div>
+  )
 }
 
 function setupConnections(){
