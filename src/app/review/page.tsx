@@ -1,12 +1,15 @@
 "use client"
 
+import EventList from "@/component/EventList";
 import Hls from "hls.js"
 import React, {useEffect, useRef} from "react";
 import { from } from "rxjs";
+import { ArtsentryEvent } from "@/component/types";
+import { HLSPlayerProps } from "@/component/types";
+import { PlayBackService } from "@/util/PlaybackService";
+import { VcsRestAuthenticate, VcsServerContext } from "@acuity-vct/vcs-client-api/dist";
 
-interface HLSPlayerProps{
-    src: string;
-}
+
 
 const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,13 +34,44 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     }, [src]);
     return <video ref={videoRef} controls />
 };
-
-export default function Settings() {
-
+const serverContext = new VcsServerContext({host: "localhost", port:443, httpSchema:"https"});
+export default function Review() {
+  const [eventUrl, setEventUrl] = React.useState<string>();
+  
+    const events = [
+      { type: "motion", recId: "1234" },
+      { type: "lighting", recId: "4321" },
+    ]
     return(
         <div>
             <h1>Event Review</h1>
-            <HLSPlayer src="https://192.168.2.44/api/v1/playback/1b484355-c9f7-474f-8c7a-a2b9e2b33e6a/playlist.m3u8"/>
+              
+            {eventUrl && <HLSPlayer src={eventUrl}/> }
+            
+            <EventList events={events} eventClick={(e) => eventSelected(e, setEventUrl)} />
         </div>
     )
+}
+
+function eventSelected(event: ArtsentryEvent, setPlaybackUrl: (url: string) => void): void{
+  // event.recId = '1688584326689:VCS_DEV_INT_4'
+  event.recId= '1666989609324:test'
+  console.log(`event selected id=${event.recId}`);
+  const playbackService = new PlayBackService(serverContext);
+  if(!serverContext.userSession.isLoggedIn()){
+    console.log("not logged in");
+    new VcsRestAuthenticate(serverContext).login("admin", "system").then((session) => {
+      playbackService.reviewEvent(event).then((srcUrl) => {
+        console.log(`srcUrl=${srcUrl}`);
+        setPlaybackUrl(srcUrl)
+      });
+    });
+  }else{
+    
+    playbackService.reviewEvent(event).then((srcUrl) => {
+      console.log(`srcUrl=${srcUrl}`);
+      setPlaybackUrl(srcUrl);
+    });
+  }
+  
 }
