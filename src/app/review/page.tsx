@@ -15,6 +15,7 @@ import { VcsRestAuthenticate, VcsServerContext, VcsWsConnector, SessionEvent, Se
 const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
+    const [videoTime, setVideoTime] = React.useState<number>(0);
     useEffect(() => {
         if (!videoRef.current) return;
         const hls = new Hls();
@@ -40,6 +41,10 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
           });
         }
 
+        video.addEventListener("timeupdate", () => {
+          setVideoTime(video.currentTime);
+        });
+
         return () => {
           if(videoRef.current){
             video.removeAttribute('src');
@@ -52,9 +57,17 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
           }
         }
     }, [src]);
-    return <video ref={videoRef} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+    return (
+      <>
+        <p>video time: {videoTime}</p>
+        <video ref={videoRef} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+      </>
+      
+    );
+    
+    
 };
-const serverContext = new VcsServerContext({host: "192.168.2.44", port:80, httpSchema:"http", wsSchema: "ws"});
+const serverContext = new VcsServerContext({host: "192.168.2.44", port:443, httpSchema:"https", wsSchema: "wss"});
 const wsVcs = new VcsWsConnector(serverContext);
 const eventProcessor = new EventProcessor(wsVcs);
   
