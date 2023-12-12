@@ -133,7 +133,8 @@ function eventSelected(event: ArtsentryEvent, setPlaybackUrl: (url: string) => v
     playbackService.reviewEvent(event).then((srcUrl) => {
       console.log(`srcUrl=${srcUrl}`);
       //hack to allow the server to create the playlist. Server returns imediatly while playlist is not created yet
-      new Promise(resolve => setTimeout(resolve, 1000)).then(() => setPlaybackUrl(srcUrl));
+      // new Promise(resolve => setTimeout(resolve, 1000)).then(() => setPlaybackUrl(srcUrl));
+      setPlaybackUrl(srcUrl);
       
     });
   }
