@@ -60,14 +60,14 @@ const HLSPlayer: React.FC<HLSPlayerProps> = ({src}) => {
     return (
       <>
         <p>video time: {videoTime}</p>
-        <video ref={videoRef} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+        <video ref={videoRef} controls style={{ width: '100%', objectFit: 'contain' }}/>
       </>
       
     );
     
     
 };
-const serverContext = new VcsServerContext({host: "192.168.2.44", port:443, httpSchema:"https", wsSchema: "wss"});
+const serverContext = new VcsServerContext({host: "192.168.3.227", port:443, httpSchema:"https", wsSchema: "wss"});
 const wsVcs = new VcsWsConnector(serverContext);
 const eventProcessor = new EventProcessor(wsVcs);
   
@@ -82,9 +82,9 @@ export default function Review() {
   return (
     <div>
       <h1>Event Review</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', height: '100%' }}>
         {loggedIn && <EventList eventProcessor={eventProcessor} eventClick={(e) => eventSelected(e, setEventUrl)} /> }
-        <div>
+        <div style={{flex: 1}}>
           <p>playbackUrl:{eventUrl}</p>
           {eventUrl && <HLSPlayer src={eventUrl} />}
         </div>

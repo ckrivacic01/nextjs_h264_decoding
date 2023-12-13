@@ -27,7 +27,7 @@ const EventList: React.FC<EventListProps> = ({ eventClick, eventProcessor }) => 
     }, []);
   return (
 
-    <div style={{overflowY: 'auto', height: '100%'}}>
+    <div style={{overflowY: 'auto', maxHeight: '700px'}}>
       {eventList.map((event, index) => (
         <EventInformation key={event.recId} event={event} eventClick={eventClick} />
       ))}
